@@ -50,8 +50,7 @@ module.exports = {
             players.push(...members.map(member => buildDefaultPlayerState(member.displayName)));
             const edition = interaction.options.getString('scriptname') as string;
             return await interaction.reply(`\`\`\`${JSON.stringify(buildGameState(players, edition))}\`\`\``);
-        }
- else {
+        } else {
             return await interaction.reply('Must execute this command in a Guild!');
         }
     },

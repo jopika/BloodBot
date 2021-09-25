@@ -48,8 +48,7 @@ export async function populateGuildCommands(token: string, clientId: string, gui
         }
 
         console.log('Completed refreshing application (/) commands.');
-    }
- catch (err: unknown) {
+    } catch (err: unknown) {
         console.error(err);
     }
 }
