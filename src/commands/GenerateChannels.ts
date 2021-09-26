@@ -39,29 +39,19 @@ module.exports = {
             
             let roles = await guild.roles.fetch();
             await guild.members.fetch();
-            //     .then(roles => console.log(roles))
-            //     .catch(console.error);
-            
-            // console.log(guild.members);
 
             const makeSpectator = interaction.options.getBoolean('addspectator');
             let inGameRoleStr = interaction.options.getString('currentlyplayingrole') || gameRole;
             let storytellerRoleStr = interaction.options.getString('storytellerrole') || stRole;
             let categoryNameStr = interaction.options.getString("categoryname") || categoryName;
             
-            // TODO what if cache is not there? 
-            // let inGameRole = guild.roles.cache.find(role => role.name === inGameRoleStr);
             let inGameRole = roles.find(role => role.name === inGameRoleStr);
-            // console.log(guild.roles.cache.map(role => role.name));
             if (!inGameRole) {
                 return await interaction.reply(`Could not find that role! Role: ${inGameRoleStr}`);
             }
 
-            // let inGameMembers = inGameRole.members;
             console.log(guild.members.cache.forEach(m => console.log(m.roles.cache)));
             let inGameMembers = guild.members.cache.filter(member => !!member.roles.cache.find(role => role.name === inGameRoleStr));
-            // console.log(inGameRole);
-            // console.log(inGameMembers);
             
 
             let storytellerRole = guild.roles.cache.find(role => role.name === storytellerRoleStr);
@@ -80,24 +70,18 @@ module.exports = {
                 inGameMembers.forEach(member => {
                     let nickname = member.nickname || member.displayName || member.user.username;
                     console.log("nickname is " + nickname);
-                    // let permissions : OverwriteData = {id: member, type: "member", allow: "SEND_MESSAGES"};
                     let permissions : OverwriteData = {id: member, type: "member", allow: ["SEND_MESSAGES"]};
                     let disallowed: Array<OverwriteData> = inGameMembers.filter(other => other !== member).map(other => {
                         console.log("not allowed");
                         console.log(other);
                         return {id: other, type: "member", deny: ["VIEW_CHANNEL"]}
                     });
-                    // let disallowed: OverwriteData = {id: guild.id, type:"member", deny: "VIEW_CHANNEL"};
                     console.log([disallowed, permissions, ...storytellerPermissions]);
-                    // console.log([...disallowed, permissions, ...storytellerPermissions]);
 
                     
                     guild.channels.create(`night-${nickname}`, { parent: category, type: "GUILD_TEXT", 
-                        // permissionOverwrites: [disallowed, permissions, ...storytellerPermissions]} );
                         permissionOverwrites: [...disallowed, permissions, ...storytellerPermissions]} );
                 });
-                // TODO also want to make spectator channels that aren't visible to players.
-                // const makeSpectator = interaction.options.getBoolean('addspectator');
 
             })
             .catch(err => console.log("Failure to create new category! " + err));
