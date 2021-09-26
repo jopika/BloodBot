@@ -70,7 +70,7 @@ module.exports = {
             }
             let storytellers = storytellerRole.members;
             // storytellers should be able to use the channels
-            let storytellerPermissions: Array<OverwriteData> = storytellers.map(st => { return {id: st, type: "member", allow: "SEND_MESSAGES" }});
+            let storytellerPermissions: Array<OverwriteData> = storytellers.map(st => { return {id: st, type: "member", allow: ["SEND_MESSAGES"] }});
             
             
             // make new category
@@ -80,11 +80,20 @@ module.exports = {
                 inGameMembers.forEach(member => {
                     let nickname = member.nickname || member.displayName || member.user.username;
                     console.log("nickname is " + nickname);
-                    let permissions : OverwriteData = {id: member, type: "member", allow: "SEND_MESSAGES"};
+                    // let permissions : OverwriteData = {id: member, type: "member", allow: "SEND_MESSAGES"};
+                    let permissions : OverwriteData = {id: member, type: "member", allow: ["SEND_MESSAGES"]};
                     let disallowed: Array<OverwriteData> = inGameMembers.filter(other => other !== member).map(other => {
-                        return {id: other, type: "member", deny: "VIEW_CHANNEL"}
+                        console.log("not allowed");
+                        console.log(other);
+                        return {id: other, type: "member", deny: ["VIEW_CHANNEL"]}
                     });
+                    // let disallowed: OverwriteData = {id: guild.id, type:"member", deny: "VIEW_CHANNEL"};
+                    console.log([disallowed, permissions, ...storytellerPermissions]);
+                    // console.log([...disallowed, permissions, ...storytellerPermissions]);
+
+                    
                     guild.channels.create(`night-${nickname}`, { parent: category, type: "GUILD_TEXT", 
+                        // permissionOverwrites: [disallowed, permissions, ...storytellerPermissions]} );
                         permissionOverwrites: [...disallowed, permissions, ...storytellerPermissions]} );
                 });
                 // TODO also want to make spectator channels that aren't visible to players.
