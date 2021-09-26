@@ -6,6 +6,9 @@ let categoryName : string = "night-text-channels";
 let gameRole : string = "Current Game";
 let stRole : string = "Storyteller";
 
+
+// To set up: set the member intent, ensure you can download member list
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('generatechannels')
@@ -34,19 +37,33 @@ module.exports = {
 
             let guild : Guild = guildOrNull;
             
+            let roles = await guild.roles.fetch();
+            await guild.members.fetch();
+            //     .then(roles => console.log(roles))
+            //     .catch(console.error);
+            
+            // console.log(guild.members);
+
             const makeSpectator = interaction.options.getBoolean('addspectator');
             let inGameRoleStr = interaction.options.getString('currentlyplayingrole') || gameRole;
             let storytellerRoleStr = interaction.options.getString('storytellerrole') || stRole;
             let categoryNameStr = interaction.options.getString("categoryname") || categoryName;
             
-            let inGameRole = guild.roles.cache.find(role => role.name === inGameRoleStr);
-            console.log(guild.roles.cache.map(role => role.name));
+            // TODO what if cache is not there? 
+            // let inGameRole = guild.roles.cache.find(role => role.name === inGameRoleStr);
+            let inGameRole = roles.find(role => role.name === inGameRoleStr);
+            // console.log(guild.roles.cache.map(role => role.name));
             if (!inGameRole) {
                 return await interaction.reply(`Could not find that role! Role: ${inGameRoleStr}`);
             }
 
-            let inGameMembers = inGameRole.members;
+            // let inGameMembers = inGameRole.members;
+            console.log(guild.members.cache.forEach(m => console.log(m.roles.cache)));
+            let inGameMembers = guild.members.cache.filter(member => !!member.roles.cache.find(role => role.name === inGameRoleStr));
+            // console.log(inGameRole);
+            // console.log(inGameMembers);
             
+
             let storytellerRole = guild.roles.cache.find(role => role.name === storytellerRoleStr);
             if (storytellerRole === undefined) {
                 return await interaction.reply(`Could not find that role! Role: ${storytellerRole}`);
@@ -61,7 +78,8 @@ module.exports = {
             .then(category => {
                 // make new channels for each member
                 inGameMembers.forEach(member => {
-                    let nickname = member.nickname || member.displayName;
+                    let nickname = member.nickname || member.displayName || member.user.username;
+                    console.log("nickname is " + nickname);
                     let permissions : OverwriteData = {id: member, type: "member", allow: "SEND_MESSAGES"};
                     let disallowed: Array<OverwriteData> = inGameMembers.filter(other => other !== member).map(other => {
                         return {id: other, type: "member", deny: "VIEW_CHANNEL"}
