@@ -1,10 +1,8 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { channel } from 'diagnostics_channel';
-import { ChannelType } from 'discord-api-types';
-import { CommandInteraction, GuildMember, Guild, OverwriteData, CategoryChannel, Collection } from 'discord.js';
+import { CategoryChannel, CommandInteraction, Guild } from 'discord.js';
 
 // todo: move this into general config
-let categoryName : string = "night-text-channels";
+const categoryName = 'night-text-channels';
 
 // To set up: set the member intent, ensure you can download member list
 
@@ -14,38 +12,39 @@ module.exports = {
         .setDescription('Remove ephemeral night channels for current game (when game is over)')
         .addStringOption(option => option.setName('categoryname')
             .setDescription('Name of generated category (default: night-text-channels)')
-            .setRequired(false)
+            .setRequired(false),
         ),
     async execute(interaction: CommandInteraction) {
         if (interaction.inGuild()) {
             // get the current guild
-            let guildOrNull = interaction.guild; // TODO????
+            // TODO????
+            const guildOrNull = interaction.guild;
             if (guildOrNull === undefined || guildOrNull === null) {
                 return await interaction.reply('Must execute this command in a Guild!');
-            } 
-            
-            let categoryNameStr = interaction.options.getString("categoryname") || categoryName;
+            }
 
-            let guild : Guild = guildOrNull;
-            
+            const categoryNameStr = interaction.options.getString('categoryname') || categoryName;
+
+            const guild: Guild = guildOrNull;
+
             await guild.channels.fetch();
-            let channels = guild.channels.cache.filter(c => c.type === "GUILD_CATEGORY").filter(c => c.name.toLowerCase() == categoryNameStr);
+            const channels = guild.channels.cache.filter(c => c.type === 'GUILD_CATEGORY').filter(c => c.name.toLowerCase() == categoryNameStr);
             console.log(channels);
             if (!channels) {
-                return await interaction.reply(`No such channels under ${categoryName}`);    
+                return await interaction.reply(`No such channels under ${categoryName}`);
             }
-            
+
             // console.log(channel.type);
             // TODO - might just want to find first
-            channels.each(channel => {
-            if (channel.type === "GUILD_CATEGORY") {
-                let chan: CategoryChannel = <CategoryChannel> channel;
-                console.log(chan.children);
-                chan.children.each(child => 
-                    child.delete());
-                channel.delete();
-            }
-        });
+            channels.each(chan => {
+                if (chan.type === 'GUILD_CATEGORY') {
+                    const categoryChannel: CategoryChannel = chan as CategoryChannel;
+                    console.log(categoryChannel.children);
+                    categoryChannel.children.each(child =>
+                        child.delete());
+                    categoryChannel.delete();
+                }
+            });
 
             // let channelId = channel.id;
             // console.log(channelId);
@@ -62,7 +61,7 @@ module.exports = {
             // let cat_chan: CategoryChannel = <CategoryChannel>channel;
             // console.log(cat_chan.children);
 
-            // channel.children.each(child => 
+            // channel.children.each(child =>
             //     child.delete());
 
             return await interaction.reply(`Deleted channels under ${categoryNameStr}`);
