@@ -1,11 +1,13 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, Guild, OverwriteData } from 'discord.js';
+import { CommandInteraction, OverwriteData } from 'discord.js';
 
 // todo: move this into general config
-const categoryName = 'night-text-channels';
-const gameRole = 'Current Game';
-const stRole = 'Storyteller';
-
+const DEFAULT_NIGHT_CHANNEL_NAME = 'night-text-channels';
+const DEFAULT_CURRENTLY_PLAYING_ROLE_NAME = 'Current Game';
+const DEFAULT_STORYTELLER_ROLE_NAME = 'Storyteller';
+const CURRENTLY_PLAYING_OPTION = 'currentlyplayingrole';
+const STORYTELLER_ROLE_OPTION = 'storytellerrole';
+const CATEGORY_NAME_OPTION = 'categoryname';
 
 // To set up: set the member intent, ensure you can download member list
 
@@ -17,47 +19,52 @@ module.exports = {
             .setName('addspectator')
             .setDescription('Make a spectator channel')
             .setRequired(false))
-        .addStringOption(option => option.setName('currentlyplayingrole')
-            .setDescription('Role of current players (default: Current Game)')
+        .addStringOption(option => option.setName(CURRENTLY_PLAYING_OPTION)
+            .setDescription(`Role of current players (default: ${DEFAULT_CURRENTLY_PLAYING_ROLE_NAME})`)
             .setRequired(false))
-        .addStringOption(option => option.setName('storytellerrole')
-            .setDescription('Role of current storytellers (default: Storyteller)')
+        .addStringOption(option => option.setName(STORYTELLER_ROLE_OPTION)
+            .setDescription(`Role of current storytellers (default: ${DEFAULT_STORYTELLER_ROLE_NAME})`)
             .setRequired(false))
-        .addStringOption(option => option.setName('categoryname')
-            .setDescription('Name of generated category (default: night-text-channels)')
+        .addStringOption(option => option.setName(CATEGORY_NAME_OPTION)
+            .setDescription(`Name of generated category (default: ${DEFAULT_NIGHT_CHANNEL_NAME})`)
             .setRequired(false),
         ),
     async execute(interaction: CommandInteraction) {
         if (interaction.inGuild()) {
             // get the current guild
-            // TODO????
-            const guildOrNull = interaction.guild;
-            if (guildOrNull === undefined || guildOrNull === null) {
-                return await interaction.reply('Must execute this command in a Guild!');
+            const guild = interaction.guild;
+            if (guild === undefined || guild === null) {
+                return await interaction.reply({
+                    content: 'Must execute this command in a Guild!',
+                    ephemeral: true,
+                });
             }
-
-            const guild: Guild = guildOrNull;
 
             const roles = await guild.roles.fetch();
             await guild.members.fetch();
 
             // const makeSpectator = interaction.options.getBoolean('addspectator'); TODO: Add spectator channel
-            const inGameRoleStr = interaction.options.getString('currentlyplayingrole') || gameRole;
-            const storytellerRoleStr = interaction.options.getString('storytellerrole') || stRole;
-            const categoryNameStr = interaction.options.getString('categoryname') || categoryName;
+            const inGameRoleStr = interaction.options.getString(CURRENTLY_PLAYING_OPTION) || DEFAULT_CURRENTLY_PLAYING_ROLE_NAME;
+            const storytellerRoleStr = interaction.options.getString(STORYTELLER_ROLE_OPTION) || DEFAULT_STORYTELLER_ROLE_NAME;
+            const categoryNameStr = interaction.options.getString(CATEGORY_NAME_OPTION) || DEFAULT_NIGHT_CHANNEL_NAME;
 
             const inGameRole = roles.find(role => role.name === inGameRoleStr);
             if (!inGameRole) {
-                return await interaction.reply(`Could not find that role! Role: ${inGameRoleStr}`);
+                return await interaction.reply({
+                    content: `Could not find that role! Role: ${inGameRoleStr}`,
+                    ephemeral: true,
+                });
             }
 
-            console.log(guild.members.cache.forEach(m => console.log(m.roles.cache)));
+            // Get members that are current playing, while validating the role exists
             const inGameMembers = guild.members.cache.filter(member => !!member.roles.cache.find(role => role.name === inGameRoleStr));
-
 
             const storytellerRole = guild.roles.cache.find(role => role.name === storytellerRoleStr);
             if (storytellerRole === undefined) {
-                return await interaction.reply(`Could not find that role! Role: ${storytellerRole}`);
+                return await interaction.reply({
+                    content: `Could not find that role! Role: ${storytellerRole}`,
+                    ephemeral: true,
+                });
             }
             const storytellers = storytellerRole.members;
             // storytellers should be able to use the channels
@@ -69,33 +76,35 @@ module.exports = {
             guild.channels.create(categoryNameStr, {
                 reason: 'Category for new night text channels for the current game',
                 type: 'GUILD_CATEGORY',
-            })
-                .then(category => {
-                    // make new channels for each member
-                    inGameMembers.forEach(member => {
-                        const nickname = member.nickname || member.displayName || member.user.username;
-                        console.log('nickname is ' + nickname);
-                        const permissions: OverwriteData = { id: member, type: 'member', allow: ['SEND_MESSAGES'] };
-                        const disallowed: Array<OverwriteData> = inGameMembers.filter(other => other !== member).map(other => {
-                            console.log('not allowed');
-                            console.log(other);
-                            return { id: other, type: 'member', deny: ['VIEW_CHANNEL'] };
-                        });
-                        console.log([disallowed, permissions, ...storytellerPermissions]);
-
-
-                        guild.channels.create(`night-${nickname}`, {
-                            parent: category, type: 'GUILD_TEXT',
-                            permissionOverwrites: [...disallowed, permissions, ...storytellerPermissions],
-                        });
+            }).then(category => {
+                // make new channels for each member
+                inGameMembers.forEach(member => {
+                    // override and allow the member to send messages
+                    const permissions: OverwriteData = { id: member, type: 'member', allow: ['SEND_MESSAGES'] };
+                    // remove the ability for all other current game players to view the channel
+                    const disallowed: Array<OverwriteData> = inGameMembers.filter(other => other !== member).map(otherMember => {
+                        return { id: otherMember, type: 'member', deny: ['VIEW_CHANNEL'] };
                     });
 
-                })
-                .catch(err => console.log('Failure to create new category! ' + err));
+                    // remove the ability to everyone else to send messages
+                    disallowed.push({ id: guild.roles.everyone, type: 'role', deny: ['SEND_MESSAGES'] });
 
-            return await interaction.reply(`Generated channels under ${categoryName}`);
+                    guild.channels.create(`night-${member.nickname}`, {
+                        parent: category, type: 'GUILD_TEXT',
+                        permissionOverwrites: [...disallowed, permissions, ...storytellerPermissions],
+                    });
+                });
+            }).catch(err => console.log('Failure to create new category! ' + err));
+
+            return await interaction.reply({
+                content: `Generated channels under ${DEFAULT_NIGHT_CHANNEL_NAME}`,
+                ephemeral: true,
+            });
         } else {
-            return await interaction.reply('Must execute this command in a Guild!');
+            return await interaction.reply({
+                content: 'Must execute this command in a Guild!',
+                ephemeral: true,
+            });
         }
     },
 };

@@ -58,25 +58,8 @@ module.exports = {
             });
         }
 
-        const resolvedStorytellerRole = storytellerRole;
-        const resolvedTownsfolkRole = townsfolkRole;
-
-        if (resolvedStorytellerRole === undefined || resolvedStorytellerRole === null) {
-            return await interaction.reply({
-                content: `Given storyteller role: ${storytellerRoleName} does not exist in server, please provide a valid role. Available roles: ${JSON.stringify(roles.map(role => role.name))}`,
-                ephemeral: true,
-            });
-        }
-
-        if (resolvedTownsfolkRole === undefined || resolvedTownsfolkRole === null) {
-            return await interaction.reply({
-                content: `Given townsfolk role: ${storytellerRoleName} does not exist in server, please provide a valid role. Available roles: ${JSON.stringify(roles.map(role => role.name))}`,
-                ephemeral: true,
-            });
-        }
-
-        const currentStorytellers = resolvedStorytellerRole.members;
-        const currentTownsfolk = resolvedTownsfolkRole.members;
+        const currentStorytellers = storytellerRole.members;
+        const currentTownsfolk = townsfolkRole.members;
 
         // get all members in the voice channel
         const members = voiceChannel.members;
@@ -90,22 +73,22 @@ module.exports = {
         const townsfolkDiff = calculateDifference(currentTownsfolk, targetTownsfolk);
 
         storytellerDiff.membersToAdd.forEach(member => {
-            console.log(`Added ${member.displayName} to ${resolvedStorytellerRole.name}`);
-            member.roles.add(resolvedStorytellerRole);
+            console.log(`Added ${member.displayName} to ${storytellerRole.name}`);
+            member.roles.add(storytellerRole);
         });
         storytellerDiff.membersToRemove.forEach(member => {
-            console.log(`Removed ${member.displayName} from ${resolvedStorytellerRole.name}`);
-            member.roles.remove(resolvedStorytellerRole);
+            console.log(`Removed ${member.displayName} from ${storytellerRole.name}`);
+            member.roles.remove(storytellerRole);
         });
 
         townsfolkDiff.membersToAdd.forEach(member => {
-            console.log(`Added ${member.displayName} to ${resolvedTownsfolkRole.name}`);
-            member.roles.add(resolvedTownsfolkRole);
+            console.log(`Added ${member.displayName} to ${townsfolkRole.name}`);
+            member.roles.add(townsfolkRole);
         });
 
         townsfolkDiff.membersToRemove.forEach(member => {
-            console.log(`Removed ${member.displayName} from ${resolvedTownsfolkRole.name}`);
-            member.roles.remove(resolvedTownsfolkRole);
+            console.log(`Removed ${member.displayName} from ${townsfolkRole.name}`);
+            member.roles.remove(townsfolkRole);
         });
 
         return await interaction.reply({
