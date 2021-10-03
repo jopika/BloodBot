@@ -62,6 +62,11 @@ module.exports = {
             });
 
             await Promise.all(movePromise);
+            await new Promise<void>((resolve) => {
+                setTimeout(() => {
+                    resolve();
+                }, 200);
+            });
 
             membersToMove = calculateRemainingToMove(voiceChannel, membersToMove);
         }

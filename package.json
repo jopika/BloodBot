@@ -19,6 +19,7 @@
   "description": "Blood on the Clocktower Bot to manage online game instances on Discord",
   "main": "build/bot.js",
   "scripts": {
+    "build": "npx run lint && npx tsc --skipLibCheck",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npx eslint . --ext .ts",
     "lint-and-fix": "npx eslint . --ext .ts --fix"
