@@ -33,6 +33,7 @@ function start(): void {
 
         const commandName: string = interaction.commandName;
         const command: ICommand | undefined = commandMap.get(commandName);
+
         if (command === undefined) {
             await interaction.reply('Unable to parse command, try again with a valid command');
         } else {

@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction, OverwriteData } from 'discord.js';
+import { verifyOperator } from '../utils/InteractionManager';
 
 // todo: move this into general config
 const DEFAULT_NIGHT_CHANNEL_NAME = 'night-text-channels';
@@ -30,6 +31,8 @@ module.exports = {
             .setRequired(false),
         ),
     async execute(interaction: CommandInteraction) {
+        if (!verifyOperator(interaction)) return;
+
         if (interaction.inGuild()) {
             // get the current guild
             const guild = interaction.guild;
@@ -43,7 +46,7 @@ module.exports = {
             const roles = await guild.roles.fetch();
             await guild.members.fetch();
 
-            // const makeSpectator = interaction.options.getBoolean('addspectator'); TODO: Add spectator channel
+            // const makeSpectator = interaction.options.getBoolean('addspectator'); // TODO: Add spectator channel
             const inGameRoleStr = interaction.options.getString(CURRENTLY_PLAYING_OPTION) || DEFAULT_CURRENTLY_PLAYING_ROLE_NAME;
             const storytellerRoleStr = interaction.options.getString(STORYTELLER_ROLE_OPTION) || DEFAULT_STORYTELLER_ROLE_NAME;
             const categoryNameStr = interaction.options.getString(CATEGORY_NAME_OPTION) || DEFAULT_NIGHT_CHANNEL_NAME;
@@ -89,7 +92,7 @@ module.exports = {
                     // remove the ability to everyone else to send messages
                     disallowed.push({ id: guild.roles.everyone, type: 'role', deny: ['SEND_MESSAGES'] });
 
-                    guild.channels.create(`night-${member.nickname}`, {
+                    guild.channels.create(`night-${member.nickname || member.displayName}`, {
                         parent: category, type: 'GUILD_TEXT',
                         permissionOverwrites: [...disallowed, permissions, ...storytellerPermissions],
                     });
@@ -97,7 +100,7 @@ module.exports = {
             }).catch(err => console.log('Failure to create new category! ' + err));
 
             return await interaction.reply({
-                content: `Generated channels under ${DEFAULT_NIGHT_CHANNEL_NAME}`,
+                content: `Generated channels under ${categoryNameStr}`,
                 ephemeral: true,
             });
         } else {

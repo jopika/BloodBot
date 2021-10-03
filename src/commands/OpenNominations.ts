@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CategoryChannel, CommandInteraction, GuildMember, VoiceChannel } from 'discord.js';
-import { getAuthorVoiceChannel } from '../utils/InteractionManager';
+import { getAuthorVoiceChannel, verifyOperator } from '../utils/InteractionManager';
 
 
 const CHANNEL_NAME_OPTION = 'channel_name';
@@ -12,6 +12,8 @@ module.exports = {
         .addStringOption(option => option.setName(CHANNEL_NAME_OPTION)
             .setDescription('Channel name to move people to')),
     execute: async function(interaction: CommandInteraction) {
+        if (!verifyOperator(interaction)) return;
+
         const { errorMessage, voiceChannel } = getAuthorVoiceChannel(interaction);
         if (voiceChannel === null) {
             return await interaction.reply({
@@ -51,7 +53,7 @@ module.exports = {
             const movePromise: Promise<GuildMember>[] = [];
 
             interaction.followUp({
-                content: `Remaining people: ${JSON.stringify(membersToMove)}`,
+                content: `Remaining people: ${JSON.stringify(membersToMove.map(member => member.displayName))}`,
                 ephemeral: true,
             });
 

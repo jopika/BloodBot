@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CategoryChannel, CommandInteraction, Guild } from 'discord.js';
+import { CategoryChannel, CommandInteraction } from 'discord.js';
+import { verifyOperator } from '../utils/InteractionManager';
 
 // todo: move this into general config
 const CATEGORY_NAME_DEFAULT = 'night-text-channels';
@@ -16,6 +17,8 @@ module.exports = {
             .setRequired(false),
         ),
     async execute(interaction: CommandInteraction) {
+        if (!verifyOperator(interaction)) return;
+
         if (interaction.inGuild()) {
             // get the current guild
             const guild = interaction.guild;

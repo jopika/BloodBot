@@ -5,6 +5,30 @@ export interface AuthorVoiceChannel {
     errorMessage: string
 }
 
+export function verifyOperator(interaction: CommandInteraction): boolean {
+    if (checkRolePrivilege(interaction, 'Operator')) {
+        return true;
+    }
+
+    interaction.reply({
+        content: 'Only members with the "Operator" role can use this command!',
+        ephemeral: true,
+    });
+
+    return false;
+}
+
+export function checkRolePrivilege(interaction: CommandInteraction, roleName: string): boolean {
+    if (interaction.inGuild()) {
+        const commandAuthor = interaction.member as GuildMember;
+        const authorRoles = commandAuthor.roles.cache;
+        const roleMatch = authorRoles.find((role) => role.name === roleName);
+        return roleMatch !== undefined;
+    }
+
+    return false;
+}
+
 /**
  * Retrieves the voice channel that the command author is in
  * @param interaction command interaction that was executed

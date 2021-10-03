@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Collection, CommandInteraction, GuildMember } from 'discord.js';
-import { getAuthorVoiceChannel } from '../utils/InteractionManager';
+import { getAuthorVoiceChannel, verifyOperator } from '../utils/InteractionManager';
 
 const STORYTELLER_ROLE_OPTION = 'storyteller_role';
 const TOWNSFOLK_ROLE_OPTION = 'townsfolk_role';
@@ -21,6 +21,8 @@ module.exports = {
             .setDescription('Spectator role to track')
             .setRequired(false)),
     execute: async function(interaction: CommandInteraction) {
+        if (!verifyOperator(interaction)) return;
+
         const { errorMessage, voiceChannel } = getAuthorVoiceChannel(interaction);
         if (voiceChannel === null) {
             return await interaction.reply({
