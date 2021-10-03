@@ -39,6 +39,9 @@ module.exports = {
 
         players.push(...members.map(member => buildDefaultPlayerState(member.displayName)));
         const edition = interaction.options.getString('scriptname') as string;
-        return await interaction.reply(`\`\`\`${JSON.stringify(buildGameState(players, edition))}\`\`\``);
+        return await interaction.reply({
+            content: `\`\`\`${JSON.stringify(buildGameState(players, edition))}\`\`\``,
+            ephemeral: true,
+        });
     },
 };
