@@ -43,8 +43,14 @@ module.exports = {
                 if (chan.type === 'GUILD_CATEGORY') {
                     const categoryChannel: CategoryChannel = chan as CategoryChannel;
                     console.log(categoryChannel.children);
-                    categoryChannel.children.each(child =>
-                        child.delete());
+                    categoryChannel.children.each(async (child) => {
+                        await new Promise<void>((resolve) => {
+                            setTimeout(() => {
+                                resolve();
+                            }, 300);
+                        });
+                        child.delete();
+                    });
                     categoryChannel.delete();
                 }
             });
