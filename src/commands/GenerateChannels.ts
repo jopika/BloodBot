@@ -12,7 +12,7 @@ const SPECTATOR_CHANNEL_NAME = 'spectator-chat';
 
 const PLAYER_ROLE_OPTION = 'currentlyplayingrole';
 const STORYTELLER_ROLE_OPTION = 'storytellerrole';
-const SPECTATOR_ROLE_OPTION = 'spectatorRole';
+const SPECTATOR_ROLE_OPTION = 'spectatorrole';
 
 const CATEGORY_NAME_OPTION = 'categoryname';
 
