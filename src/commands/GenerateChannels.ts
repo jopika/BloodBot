@@ -55,7 +55,8 @@ module.exports = {
             const spectatorRoleStr = interaction.options.getBoolean(SPECTATOR_ROLE_OPTION) || DEFAULT_SPECTATOR_ROLE_NAME;
             const inGameRoleStr = interaction.options.getString(PLAYER_ROLE_OPTION) || DEFAULT_CURRENTLY_PLAYING_ROLE_NAME;
             const storytellerRoleStr = interaction.options.getString(STORYTELLER_ROLE_OPTION) || DEFAULT_STORYTELLER_ROLE_NAME;
-            const categoryNameStr = interaction.options.getString(CATEGORY_NAME_OPTION) || DEFAULT_NIGHT_CHANNEL_NAME;
+            // const categoryNameStr = interaction.options.getString(CATEGORY_NAME_OPTION) || DEFAULT_NIGHT_CHANNEL_NAME;
+            const categoryNameStr = DEFAULT_NIGHT_CHANNEL_NAME;
 
             const inGameRole = roles.find(role => role.name === inGameRoleStr);
             if (!inGameRole) {

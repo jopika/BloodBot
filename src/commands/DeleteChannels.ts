@@ -26,7 +26,8 @@ module.exports = {
                 return await interaction.reply('Must execute this command in a Guild!');
             }
 
-            const categoryName = interaction.options.getString(CATEGORY_NAME_OPTION) || CATEGORY_NAME_DEFAULT;
+            // const categoryName = interaction.options.getString(CATEGORY_NAME_OPTION) || CATEGORY_NAME_DEFAULT;
+            const categoryName = CATEGORY_NAME_DEFAULT;
 
             await guild.channels.fetch();
             const channels = guild.channels.cache.filter(c => c.type === 'GUILD_CATEGORY').filter(c => c.name.toLowerCase() == categoryName);
