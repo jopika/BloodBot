@@ -63,9 +63,9 @@ module.exports = {
                 });
             }
 
-            const fetchedChannel = fetchedChannels[0];
+            const fetchedChannel = fetchedChannels.first();
 
-            if (fetchedChannel === null) {
+            if (fetchedChannel === null || fetchedChannel == undefined) {
                 return await interaction.reply({
                     content: 'Unable to find target channel category',
                     ephemeral: true,
