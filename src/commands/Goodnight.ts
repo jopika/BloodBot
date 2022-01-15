@@ -54,7 +54,7 @@ module.exports = {
             // const targetCategory = interaction.guild;
             const channelManager = guild.channels;
             const targetChannelCategoryName: string = interaction.options.getString(CATEGORY_NAME_OPTION) || DEFAULT_CATEGORY_NAME;
-            const fetchedChannel = await channelManager.fetch(targetChannelCategoryName);
+            const fetchedChannel = (await channelManager.fetch()).filter(c => c.name.toLowerCase() == targetChannelCategoryName.toLowerCase());
 
             if (fetchedChannel === null) {
                 return await interaction.reply({
