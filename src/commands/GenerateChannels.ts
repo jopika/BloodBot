@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, OverwriteData } from 'discord.js';
-import { verifyOperator } from '../utils/InteractionManager';
+import { CategoryChannel, CommandInteraction, OverwriteData } from 'discord.js';
+import { getAuthorVoiceChannel, verifyOperator } from '../utils/InteractionManager';
 
 // todo: move this into general config
 const DEFAULT_NIGHT_CHANNEL_NAME = 'night-text-channels';
@@ -84,7 +84,7 @@ module.exports = {
                     ephemeral: true,
                 });
             }
-            const storytellers = storytellerRole.members;
+            // const storytellers = storytellerRole.members;
             // const observers = spectatorRole.members;
 
             // storytellers should be able to use the channels
@@ -105,7 +105,7 @@ module.exports = {
             guild.channels.create(categoryNameStr, {
                 reason: 'Category for new night text channels for the current game',
                 type: 'GUILD_CATEGORY',
-            }).then(category => {
+            }).then((category: CategoryChannel) => {
                 // make new channels for each member
                 inGameMembers.forEach(member => {
                     // override and allow the member to send messages
@@ -131,6 +131,32 @@ module.exports = {
                         permissionOverwrites: [...disallowed, memberPermissions, storytellerPermission, spectatorPermission],
                     });
                 });
+
+                // move category to right above the voice channel you are currently in
+                // guild.channels.fetch().then(
+                //     (channels => {
+                //
+                //     })
+                // );
+
+                const { errorMessage, voiceChannel } = getAuthorVoiceChannel(interaction);
+                if (voiceChannel === null) {
+                    return interaction.reply({
+                        content: errorMessage,
+                        ephemeral: true,
+                    });
+                }
+
+                const parentCategory: CategoryChannel | null = voiceChannel.parent;
+                if (parentCategory === null) {
+                    return interaction.reply({
+                        content: 'Should perform this action in a category voice channel',
+                        ephemeral: true,
+                    });
+                }
+
+                category.setPosition(parentCategory.position - 1);
+
             }).catch(err => console.log('Failure to create new category! ' + err));
 
             return await interaction.reply({
