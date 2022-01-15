@@ -54,7 +54,16 @@ module.exports = {
             // const targetCategory = interaction.guild;
             const channelManager = guild.channels;
             const targetChannelCategoryName: string = interaction.options.getString(CATEGORY_NAME_OPTION) || DEFAULT_CATEGORY_NAME;
-            const fetchedChannel = (await channelManager.fetch()).filter(c => c.name.toLowerCase() == targetChannelCategoryName.toLowerCase());
+            const fetchedChannels = (await channelManager.fetch()).filter(c => c.name.toLowerCase() == targetChannelCategoryName.toLowerCase());
+
+            if (fetchedChannels.size !== 1) {
+                return await interaction.reply({
+                    content: `Unable to resolve category: ${targetChannelCategoryName} as it has more than 1 result; count: ${fetchedChannels.size}`,
+                    ephemeral: true,
+                });
+            }
+
+            const fetchedChannel = fetchedChannels[0];
 
             if (fetchedChannel === null) {
                 return await interaction.reply({
