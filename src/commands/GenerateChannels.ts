@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CategoryChannel, CommandInteraction, OverwriteData } from 'discord.js';
 import { getAuthorVoiceChannel, verifyOperator } from '../utils/InteractionManager';
+import * as console from 'console';
 
 // todo: move this into general config
 const DEFAULT_NIGHT_CHANNEL_NAME = 'night-text-channels';
@@ -155,7 +156,11 @@ module.exports = {
                     });
                 }
 
-                category.setPosition(parentCategory.position - 1);
+                category.setPosition(parentCategory.position - 1).then(
+                    (resolvedCategory) => {
+                        console.log(`Completed: new position: ${resolvedCategory.position}`);
+                    },
+                );
 
             }).catch(err => console.log('Failure to create new category! ' + err));
 
