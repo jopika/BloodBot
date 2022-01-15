@@ -133,13 +133,7 @@ module.exports = {
                     });
                 });
 
-                // move category to right above the voice channel you are currently in
-                // guild.channels.fetch().then(
-                //     (channels => {
-                //
-                //     })
-                // );
-
+                // Get the channel that the author is currently in to rearrange the channels above the current category
                 const { errorMessage, voiceChannel } = getAuthorVoiceChannel(interaction);
                 if (voiceChannel === null) {
                     return interaction.reply({
@@ -156,7 +150,8 @@ module.exports = {
                     });
                 }
 
-                category.setPosition(parentCategory.position - 1).then(
+                // Set position to just before the current category
+                category.setPosition(parentCategory.position).then(
                     (resolvedCategory) => {
                         console.log(`Completed: new position: ${resolvedCategory.position}`);
                     },
