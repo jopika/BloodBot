@@ -44,14 +44,9 @@ module.exports = {
             // retrieve all players in the current channel
             const membersToMove = voiceChannel.members;
 
-            // const playersToMove = membersToMove.filter((guildMember: GuildMember) => {
-            //
-            // });
-
             // TODO: Separate out storytellers and place them into the same channel
 
             // ForEach member, assign to a unique channel
-            // const targetCategory = interaction.guild;
             const channelManager = guild.channels;
             const targetChannelCategoryName: string = interaction.options.getString(CATEGORY_NAME_OPTION) || DEFAULT_CATEGORY_NAME;
             const fetchedChannels = (await channelManager.fetch()).filter(c => c.name.toLowerCase() == targetChannelCategoryName.toLowerCase());
@@ -105,12 +100,6 @@ module.exports = {
             });
 
             await Promise.all(movePromise);
-
-            // await new Promise<void>((resolve) => {
-            //     setTimeout(() => {
-            //         resolve();
-            //     }, 200);
-            // });
 
             return await interaction.reply({
                 content: `Completed move! Moved ${calculatedMap.size} users`,
