@@ -91,7 +91,7 @@ module.exports = {
 
         await Promise.all(movePromises);
 
-        return await interaction.reply({
+        return await interaction.followUp({
             content: `Completed move! Moved ${membersToMove.size} users`,
             ephemeral: true,
         });
